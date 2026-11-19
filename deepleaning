@@ -1,0 +1,110 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyPhX+gHlLmuyENsyRpRynL0",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/2400030493/WORKSHOP/blob/main/deepleaning\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ao3AAabZQtsI",
+        "outputId": "2eabb68f-f320-4056-c74a-77e2604b6dd3"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "100%|██████████| 26.4M/26.4M [00:01<00:00, 17.7MB/s]\n",
+            "100%|██████████| 29.5k/29.5k [00:00<00:00, 280kB/s]\n",
+            "100%|██████████| 4.42M/4.42M [00:00<00:00, 5.21MB/s]\n",
+            "100%|██████████| 5.15k/5.15k [00:00<00:00, 7.63MB/s]\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch: 1 Loss: 0.3793\n",
+            "Epoch: 2 Loss: 0.1397\n",
+            "Epoch: 3 Loss: 0.4508\n",
+            "Accuracy: 86.2 %\n"
+          ]
+        }
+      ],
+      "source": [
+        "\n",
+        "import torch\n",
+        "import torch.nn as nn\n",
+        "from torchvision import datasets, transforms\n",
+        "from torch.utils.data import DataLoader\n",
+        "transform = transforms.ToTensor()\n",
+        "\n",
+        "train = datasets.FashionMNIST(\n",
+        "    root='./data', train=True, download=True, transform=transform)\n",
+        "\n",
+        "test = datasets.FashionMNIST(\n",
+        "    root='./data', train=False, download=True, transform=transform)\n",
+        "\n",
+        "train_loader = DataLoader(train, batch_size=64, shuffle=True)\n",
+        "test_loader = DataLoader(test, batch_size=64)\n",
+        "\n",
+        "model = nn.Sequential(\n",
+        "    nn.Flatten(),\n",
+        "    nn.Linear(784, 128),\n",
+        "    nn.ReLU(),\n",
+        "    nn.Linear(128, 10)\n",
+        ")\n",
+        "\n",
+        "criterion = nn.CrossEntropyLoss()\n",
+        "optimizer = torch.optim.Adam(model.parameters(), lr=0.001)\n",
+        "for epoch in range(3):\n",
+        "    for x, y in train_loader:\n",
+        "        output = model(x)\n",
+        "        loss = criterion(output, y)\n",
+        "\n",
+        "        optimizer.zero_grad()\n",
+        "        loss.backward()\n",
+        "        optimizer.step()\n",
+        "\n",
+        "    print(\"Epoch:\", epoch+1, \"Loss:\", round(loss.item(), 4))\n",
+        "correct = 0\n",
+        "total = 0\n",
+        "\n",
+        "with torch.no_grad():\n",
+        "    for x, y in test_loader:\n",
+        "        predicted = model(x).argmax(1)\n",
+        "        total += y.size(0)\n",
+        "        correct += (predicted == y).sum().item()\n",
+        "\n",
+        "print(\"Accuracy:\", round(100 * correct / total, 2), \"%\")\n"
+      ]
+    }
+  ]
+}
